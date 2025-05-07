@@ -1,0 +1,142 @@
+src/
+├── components      # 公共组件
+│   ├── NavBar      # 自定义导航栏（适配三端）
+│   ├── WallpaperCard  # 壁纸卡片组件
+│   └── CreatorCard # 创作者卡片组件
+├── pages           # 页面目录
+│   ├── index       # 首页
+│   ├── creator     # 创作者中心
+│   ├── discover    # 发现页
+│   └── profile     # 个人中心
+├── styles          # 全局样式（Sass）
+├── utils           # 工具类
+│   ├── api.js      # 网络请求封装
+│   └── platform.js # 平台差异处理
+└── app.config.js   # 跨平台配置
+
+// 功能：搜索框 + 创作者口令 + 壁纸瀑布流 + 导航
+import { View, Input, ScrollView } from '@tarojs/components';
+import WallpaperCard from '@/components/WallpaperCard';
+
+export default function Index() {
+  return (
+    <View className="page">
+      {/* 搜索框 */}
+      <Input 
+        placeholder="请输入创作者口令" 
+        className="search-bar"
+        onConfirm={(e) => handleSearch(e.detail.value)}
+      />
+
+      {/* 推荐壁纸瀑布流 */}
+      <ScrollView scrollY className="wallpaper-grid">
+        {wallpaperList.map(item => (
+          <WallpaperCard 
+            key={item.id} 
+            data={item} 
+            onTap={() => navigateToDetail(item)}
+          />
+        ))}
+      </ScrollView>
+
+      {/* 底部导航 */}
+      <CustomTabBar current={0} />
+    </View>
+  );
+}
+
+// 功能：创作者入驻 + 排行榜
+import CreatorCard from '@/components/CreatorCard';
+
+export default function Creator() {
+  return (
+    <View>
+      {/* 入驻入口 */}
+      <View className="entry-card" onClick={navigateToSignup}>
+        <Text>欢迎创作者入驻 →</Text>
+      </View>
+
+      {/* 创作者排行榜 */}
+      {creatorList.map(creator => (
+        <CreatorCard 
+          key={creator.id}
+          avatar={creator.avatar}
+          name={creator.name}
+          fans={creator.fans}
+        />
+      ))}
+    </View>
+  );
+}
+
+// 功能：互动测试卡片流
+export default function Discover() {
+  const tests = [
+    { title: '你是几级调解员？', desc: '“调解员”作为化解人民群众矛盾…' },
+    // ...其他测试数据
+  ];
+
+  return (
+    <ScrollView>
+      {tests.map((test, index) => (
+        <View key={index} className="test-card">
+          <Text className="title">{test.title}</Text>
+          <Text className="desc">{test.desc}</Text>
+          <Button onClick={() => startTest(test)}>立即测试 →</Button>
+        </View>
+      ))}
+    </ScrollView>
+  );
+}
+
+// 功能：会员体系 + 收藏管理
+export default function Profile() {
+  return (
+    <View>
+      {/* 会员入口 */}
+      <View className="vip-banner" onClick={openVip}>
+        <Text>尊享会员 · 解锁特权</Text>
+      </View>
+
+      {/* 功能列表 */}
+      <View className="menu-list">
+        <View className="menu-item" onClick={navigateToCollection}>
+          <Text>收藏作品</Text>
+          <ArrowRight />
+        </View>
+        {/* 其他菜单项... */}
+      </View>
+    </View>
+  );
+}
+
+// utils/platform.js
+export const getNavBarHeight = () => {
+  if (process.env.TARO_ENV === 'weapp') return 44;
+  if (process.env.TARO_ENV === 'tt') return 48; // 抖音
+  return 40; // 快手
+};
+
+// styles/mixins.scss
+@mixin multi-platform-border {
+  @supports (border-radius: env(safe-area-inset-bottom)) {
+    border-radius: calc(12px + env(safe-area-inset-bottom));
+  }
+}
+
+// 组件中使用环境变量
+<Image 
+  src={process.env.TARO_ENV === 'weapp' ? wechatCDN : douyinCDN}
+/>
+
+<Image 
+  lazyLoad 
+  src={url} 
+  onLoad={() => setLoaded(true)}
+/>
+
+// app.config.js
+subPackages: [{
+  root: 'wallpaperPackage',
+  pages: ['detail', 'category']
+}]
